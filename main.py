@@ -7,7 +7,7 @@ from config import TOKEN
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
-obr = True
+obr = [True]
 i = 0
 
 
@@ -19,15 +19,22 @@ async def process_start_command(message: types.Message):
 
 @dp.message_handler(text='Прислать задание')
 async def process_start_command(message: types.Message):
-    if obr:
-        await bot.send_message(message.from_user.id, 'Пришли фото')
+    if obr[0]:
+        await bot.send_message(message.from_user.id, 'Ты можешь прислать задание (фото) с которым у тебя проблемы, но учти, сейчас бот находится на стадии beta, поэтому ответ может поступать от 3 дней')
+        obr[0] = False
 
 
 @dp.message_handler(content_types=['photo'])
 async def process_start_command(message: types.Message):
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(KeyboardButton('Прислать задание'))
     await message.photo[-1].download(f'photos/{message.photo[-1].file_id}.jpg')
-    await bot.send_message(message.from_user.id, 'Менеджер ответит вам в ближайшее время')
+    await bot.send_message(message.from_user.id, 'Отлично! Мы посмотрим его как можно раньше.')
+
+
+@dp.message_handler()
+async def process_start_command(message: types.Message):
+    if not obr:
+        await bot.send_message(message.from_user.id, 'Возможно ты ошибся, тебе необходимо отправить фотографию с заданием. Попробуй еще раз!')
 
 
 if __name__ == '__main__':
